@@ -4,6 +4,7 @@
 #include <vector>
 #include <optional>
 #include <string>
+#include <tuple>
 
 class Matrix {
   private:
@@ -34,6 +35,8 @@ class Matrix {
     static std::optional<Matrix> matmul_blocked(const Matrix& mat_a, const Matrix& mat_b);
 
     std::string to_string() const;
+
+    std::tuple<double, double, double> compare_times(const Matrix& other) const;
 };
 
 #endif

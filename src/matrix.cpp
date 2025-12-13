@@ -5,6 +5,9 @@
 #include <optional>
 #include <omp.h>
 #include <string>
+#include <tuple>
+#include <cassert>
+#include <chrono>
 
 // Constructor taking a 2D vector
 Matrix::Matrix(const std::vector<std::vector<double>>& mat) : M(mat) {}
@@ -175,4 +178,29 @@ std::string Matrix::to_string() const {
   auto& mat = *this;
   std::string mat_str = to_string_helper(mat);
   return mat_str;
+}
+
+std::tuple<double, double, double> Matrix::compare_times(const Matrix& other) const {
+  using std::chrono::high_resolution_clock;
+  using std::chrono::duration;
+  using std::chrono::milliseconds;
+
+  // Time naive matmul
+  auto t1 = high_resolution_clock::now();
+  auto C = Matrix::matmul(*this, other);
+  auto t2 = high_resolution_clock::now();
+
+  // Time parallel matmul
+  auto C_1 = Matrix::matmul_parallel(*this, other);
+  auto t3 = high_resolution_clock::now();
+
+  // Time blocked matmul
+  auto C_3 = Matrix::matmul_blocked(*this, other);
+  auto t4 = high_resolution_clock::now();
+
+  duration<double, std::milli> basic_time = t2 - t1;
+  duration<double, std::milli> parallel_time = t3 - t2;
+  duration<double, std::milli> blocked_time = t4 - t3;
+
+  return std::make_tuple(basic_time.count(), parallel_time.count(), blocked_time.count());
 }

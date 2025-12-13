@@ -63,5 +63,10 @@ PYBIND11_MODULE(emath, m) {
         .def("__matmul__",
             &Matrix::matmul_blocked,
             "Blocked matrix multiplication"
+        )
+
+        .def("compare_times",
+            &Matrix::compare_times,
+            "Compares runtime of naive vs blocked matmul."
         );
 }
