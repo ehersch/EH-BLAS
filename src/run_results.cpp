@@ -4,6 +4,7 @@
 #include <cassert>
 #include <chrono>
 #include <random>
+#include <boost/python.hpp>
 
 Matrix random_matrix(int rows, int cols) {
   std::default_random_engine generator;
@@ -24,7 +25,9 @@ int main() {
   using std::chrono::duration;
   using std::chrono::milliseconds;
 
-  int N = 500;
+  // blocking works with various dims
+  int N = 899;
+  int M = 723;
 
   Matrix A = random_matrix(N,N);
   Matrix B = random_matrix(N,N);
@@ -47,6 +50,12 @@ int main() {
 
   duration<double, std::milli> basic_time = t2 - t1;
   duration<double, std::milli> parallel_time = t3 - t2;
+
+  //With bloxking
+  Matrix C_2 = Matrix::matmul_blocked(A, B).value();
+  auto t4 = high_resolution_clock::now();
+
+  duration<double, std::milli> blocked_time = t4 - t3;
   //if (C) Matrix::print(*C); // must use dereference C to get value
 
   //Matrix::print(C_1);
@@ -63,6 +72,11 @@ int main() {
 
   std::cout << "Basic count: " << basic_time.count() << "ms\n";
   std::cout << "Parallel time: " << parallel_time.count() << "ms\n";
+  std::cout << "Blocked time: " << blocked_time.count() << "ms\n";
+
+  bool res_bool = (C_1 == C.value() and C_2 == C.value());
+
+  std::cout << "All correct: " << res_bool << std::endl;
 
   return 0;
 }
