@@ -2,6 +2,8 @@
 
 This project recreates core linear algebra routines—matrix multiplication, inversion, QR factorization, and gradient-based solvers—to understand the optimizations that make libraries like NumPy or SciPy efficient. The implementations power both command-line experiments and Python bindings, enabling end-to-end regression workflows (OLS, MAP, least squares) without external dependencies.
 
+Check out my corresponding Medium post here! https://medium.com/@herschethan/c-matrix-multiplication-optimization-e9818ac2593e
+
 ## Project overview
 
 - Start from a naive matrix multiply and progressively add cache-friendly blocking and OpenMP parallelism to quantify the performance impact of each optimization.
