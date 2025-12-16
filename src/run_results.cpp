@@ -4,7 +4,6 @@
 #include <cassert>
 #include <chrono>
 #include <random>
-#include <boost/python.hpp>
 
 Matrix random_matrix(int rows, int cols) {
   std::default_random_engine generator;

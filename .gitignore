@@ -1,5 +1,5 @@
-*.so
-*.dylib
+src/*.so
+src/*.dylib
 a.out
 main
 matrix_test
