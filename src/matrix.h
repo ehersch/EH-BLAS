@@ -26,7 +26,7 @@ class Matrix {
       However, using (Matrix& other) fails since it can’t bind a const or temporary Matrix (like the one created in (*C == result)) to a non-const reference.
     */
 
-    bool approx_equal(const Matrix& other, double tol = 1e-9) const;
+    bool approx_equal(const Matrix& ozther, double tol = 1e-9) const;
 
     static std::optional<Matrix> matmul_parallel(const Matrix& mat_a, const Matrix& mat_b);
 
@@ -37,6 +37,9 @@ class Matrix {
     std::string to_string() const;
 
     std::tuple<double, double, double> compare_times(const Matrix& other) const;
+
+    // doesn't modify Matrix.M, so is const
+    Matrix transpose() const;
 };
 
 #endif

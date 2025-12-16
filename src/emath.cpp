@@ -68,5 +68,7 @@ PYBIND11_MODULE(emath, m) {
         .def("compare_times",
             &Matrix::compare_times,
             "Compares runtime of naive vs blocked matmul."
-        );
+        )
+
+        .def("transpose", &Matrix::transpose, "Transpose matrix");
 }

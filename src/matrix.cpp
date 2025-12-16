@@ -44,19 +44,19 @@ void Matrix::print(const Matrix& mat) {
 std::optional<Matrix> Matrix::matmul(const Matrix& mat_a, const Matrix& mat_b) {
   std::vector<std::vector<double>> A = mat_a.M;
   std::vector<std::vector<double>> B = mat_b.M;
-  int n = A.size();
-  int k = A[0].size();
+  size_t n = A.size();
+  size_t k = A[0].size();
 
   if (B.size() != k) {
     throw std::runtime_error("Matrix dimensions do not match.");
   }
 
-  int m = B[0].size();
+  size_t m = B[0].size();
   
   std::vector<std::vector<double>> C(n, std::vector<double>(m, 0));
-  for (int row = 0; row < n; row++) {
-    for (int col = 0; col < m; col++) {
-      for (int i = 0; i < k; i++) {
+  for (size_t row = 0; row < n; row++) {
+    for (size_t col = 0; col < m; col++) {
+      for (size_t i = 0; i < k; i++) {
         C[row][col] += A[row][i] * B[i][col];
       }
     }
@@ -101,14 +101,14 @@ double dot(const std::vector<double>& x, const std::vector<double>& y) {
 std::optional<Matrix> Matrix::matmul_parallel(const Matrix& mat_a, const Matrix& mat_b) {
   std::vector<std::vector<double>> A = mat_a.M;
   std::vector<std::vector<double>> B = mat_b.M;
-  int n = A.size();
-  int k = A[0].size();
+  size_t n = A.size();
+  size_t k = A[0].size();
 
   if (B.size() != k) {
     throw std::runtime_error("Matrix dimensions do not match.");
   }
 
-  int m = B[0].size();
+  size_t m = B[0].size();
   std::vector<std::vector<double>> C(n, std::vector<double>(m, 0));
 
   //omp_set_num_threads(8);
@@ -116,9 +116,9 @@ std::optional<Matrix> Matrix::matmul_parallel(const Matrix& mat_a, const Matrix&
 
   // change the order of i and col to increase hit rate
   // i.e. we reuse A[row][i] so keep it cached
-  for (int row = 0; row < n; row++) {
-    for (int i = 0; i < k; i++) {
-      for (int col = 0; col < m; col++) {
+  for (size_t row = 0; row < n; row++) {
+    for (size_t i = 0; i < k; i++) {
+      for (size_t col = 0; col < m; col++) {
         C[row][col] += A[row][i] * B[i][col];
       }
     }
@@ -136,32 +136,32 @@ std::optional<Matrix> Matrix::matmul_blocked(const Matrix& mat_a, const Matrix& 
     const auto& A = mat_a.M;
     const auto& B = mat_b.M;
 
-    int n = A.size();
-    int k = A[0].size();
+    size_t n = A.size();
+    size_t k = A[0].size();
 
     if (B.size() != k)
         throw std::runtime_error("Matrix dimensions do not match.");
 
-    int m = B[0].size();
+    size_t m = B[0].size();
 
-    int block = 64;  // good for Apple M-series CPUs
+    size_t block = 64;  // good for Apple M-series CPUs
 
     std::vector<std::vector<double>> C(n, std::vector<double>(m, 0));
 
     #pragma omp parallel for collapse(3) schedule(static)
 
-    for (int ii = 0; ii < n; ii += block) {
-        for (int kk = 0; kk < k; kk += block) {
-            for (int jj = 0; jj < m; jj += block) {
+    for (size_t ii = 0; ii < n; ii += block) {
+        for (size_t kk = 0; kk < k; kk += block) {
+            for (size_t jj = 0; jj < m; jj += block) {
 
-                int i_max = std::min(ii + block, n);
-                int k_max = std::min(kk + block, k);
-                int j_max = std::min(jj + block, m);
+                size_t i_max = std::min(ii + block, n);
+                size_t k_max = std::min(kk + block, k);
+                size_t j_max = std::min(jj + block, m);
 
-                for (int i = ii; i < i_max; i++) {
-                    for (int kk2 = kk; kk2 < k_max; kk2++) {
+                for (size_t i = ii; i < i_max; i++) {
+                    for (size_t kk2 = kk; kk2 < k_max; kk2++) {
                         double a_val = A[i][kk2];
-                        for (int j = jj; j < j_max; j++) {
+                        for (size_t j = jj; j < j_max; j++) {
                             C[i][j] += a_val * B[kk2][j];
                         }
                     }
@@ -203,4 +203,21 @@ std::tuple<double, double, double> Matrix::compare_times(const Matrix& other) co
   duration<double, std::milli> blocked_time = t4 - t3;
 
   return std::make_tuple(basic_time.count(), parallel_time.count(), blocked_time.count());
+}
+
+Matrix Matrix::transpose() const {
+  auto& A = this->M;
+
+  int n = A.size();
+  int m = A[0].size();
+
+  std::vector<std::vector<double>> B(n, std::vector<double>(m, 0));
+
+  # pragma omp parallel for collapse(2)
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) {
+      B[i][j] = A[j][i];
+    }
+  }
+  return Matrix(B);
 }
