@@ -211,7 +211,7 @@ Matrix Matrix::transpose() const {
   int n = A.size();
   int m = A[0].size();
 
-  std::vector<std::vector<double>> B(n, std::vector<double>(m, 0));
+  std::vector<std::vector<double>> B(m, std::vector<double>(n, 0));
 
   # pragma omp parallel for collapse(2)
   for (int i = 0; i < n; i++) {
@@ -220,4 +220,91 @@ Matrix Matrix::transpose() const {
     }
   }
   return Matrix(B);
+}
+
+Matrix identity(int n) {
+  // returns an nxn identity matrix
+  std::vector<std::vector<double>> M(n, std::vector<double>(n, 0));
+
+  for (int i = 0; i < n; i++) {
+    M[i][i] = 1;
+  }
+  return Matrix(M)
+}
+
+Matrix LU(const Matrix& M) {
+  // Computes the LU decomposition (partial pivoting)
+  // https://www.cs.cornell.edu/courses/cs4220/2022sp/lec/2022-02-11.pdf
+  std::vector<std::vector<double>> A = M.M;
+  int n = A.size() // only square matrices are invertible
+
+  auto& L = identity(n);
+  auto& P = identity(n);
+
+  std::vector<std::vector<double>> copy_vector = A.copy();
+  Matrix U = Matrix(copy_vector);
+
+  for (int k = 0 k < n - 1; k++) {
+    std::vector<double>::iterator max = max_element(U[k:][k].begin(), U[k:][k].end());
+    int i = distance(U[k:][k].begin(), max) + k; // absolute index of max
+    
+    U[[k, i]][k:] = U[[i, k]][k:];
+    P[[k, i]][:] = P[[i, k]][:];
+    L[[k, i]][:k] = L[[i, k]][:k];
+
+    // perform elimination
+    for (int j = k+1; j < n; j++) {
+      L[j][k] = U[j][k] / U[k][k];
+      U[j][k:] = U[j][k:] - L[j][k] * U[k][k:];
+    }
+  }
+
+  return Matrix(L), Matrix(U), Matrix(P)
+}
+
+std::vector<double> forward_substitution(
+    const Matrix& L,
+    const std::vector<double>& b
+) {
+    int n = b.size();
+    std::vector<double> y(n); // allocates a vector of n 0.0s
+
+    for (int i = 0; i < n; ++i) {
+        y[i] = b[i];
+        for (int j = 0; j < i; ++j) {
+            y[i] -= L.M[i][j] * y[j];
+        }
+        // no division: L(i,i) = 1
+    }
+    return y;
+}
+
+
+Matrix back_substitution(const Matrix& M) {
+  std::vector<std::vector<double>> M = M.M;
+  int n = M.size()
+
+  for (int i = 0; i < n; i++) {
+    
+  }
+}
+
+
+Matrix Matrix::inverse() const {
+  auto& A = (*this).M;
+
+  (L, U, P) = LU(A);
+  // PA = LU
+  // A = P^-1 LU
+  // A = P^T LU since the permutation matrix is orthogonal
+  // A^-1 = U^-1 L^-1 P
+
+  auto& U_inv = back_substitution(U);
+  auto& L_inv = forward_substitution(L);
+
+  return matmul_blocked(U_inv, matmul_blocked(_inv, P));
+}
+
+Matrix inverse(const Matrix& A) {
+  return A.inverse();
 }

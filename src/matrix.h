@@ -40,6 +40,8 @@ class Matrix {
 
     // doesn't modify Matrix.M, so is const
     Matrix transpose() const;
+
+    Matrix inverse() const;
 };
 
 #endif
