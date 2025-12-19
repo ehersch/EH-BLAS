@@ -26,7 +26,7 @@ class Matrix {
       However, using (Matrix& other) fails since it can’t bind a const or temporary Matrix (like the one created in (*C == result)) to a non-const reference.
     */
 
-    bool approx_equal(const Matrix& ozther, double tol = 1e-9) const;
+    bool approx_equal(const Matrix& other, double tol = 1e-9) const;
 
     static std::optional<Matrix> matmul_parallel(const Matrix& mat_a, const Matrix& mat_b);
 
@@ -43,5 +43,13 @@ class Matrix {
 
     Matrix inverse() const;
 };
+
+struct LUResult {
+    Matrix L;
+    Matrix U;
+    Matrix P;
+};
+
+LUResult LU(const Matrix& A);
 
 #endif

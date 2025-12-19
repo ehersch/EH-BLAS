@@ -229,37 +229,52 @@ Matrix identity(int n) {
   for (int i = 0; i < n; i++) {
     M[i][i] = 1;
   }
-  return Matrix(M)
+  return Matrix(M);
 }
 
-Matrix LU(const Matrix& M) {
+LUResult LU(const Matrix& M) {
   // Computes the LU decomposition (partial pivoting)
   // https://www.cs.cornell.edu/courses/cs4220/2022sp/lec/2022-02-11.pdf
   std::vector<std::vector<double>> A = M.M;
-  int n = A.size() // only square matrices are invertible
+  int n = A.size(); // only square matrices are invertible
 
-  auto& L = identity(n);
-  auto& P = identity(n);
+  auto L = identity(n).M;
+  auto P = identity(n).M;
 
-  std::vector<std::vector<double>> copy_vector = A.copy();
-  Matrix U = Matrix(copy_vector);
+  std::vector<std::vector<double>> U_copy = A; // this effectively takes a copy of A by assigment
+  auto U = Matrix(U_copy).M;
 
-  for (int k = 0 k < n - 1; k++) {
-    std::vector<double>::iterator max = max_element(U[k:][k].begin(), U[k:][k].end());
-    int i = distance(U[k:][k].begin(), max) + k; // absolute index of max
+  for (int k = 0; k < n - 1; k++) {
+    int pivot = k;
+    double max_val = std::abs(U[k][k]);
+
+    for (int i = k + 1; i < n; ++i) {
+      if (std::abs(U[i][k]) > max_val) {
+        max_val = std::abs(U[i][k]);
+        pivot = i;
+      }
+    }
+
+    if (pivot != k) {
+      std::swap(U[k], U[pivot]);
+      std::swap(P[k], P[pivot]);
+
+      // swap only first k columns of L
+      for (int j = 0; j < k; ++j) {
+        std::swap(L[k][j], L[pivot][j]);
+      }
+    }
     
-    U[[k, i]][k:] = U[[i, k]][k:];
-    P[[k, i]][:] = P[[i, k]][:];
-    L[[k, i]][:k] = L[[i, k]][:k];
-
     // perform elimination
-    for (int j = k+1; j < n; j++) {
-      L[j][k] = U[j][k] / U[k][k];
-      U[j][k:] = U[j][k:] - L[j][k] * U[k][k:];
+    for (int i = k+1; i < n; i++) {
+      L[i][k] = U[i][k] / U[k][k];
+      for (int j = k; j < n; ++j) {
+        U[i][j] -= L[i][k] * U[k][j];
+      }
     }
   }
 
-  return Matrix(L), Matrix(U), Matrix(P)
+  return {Matrix(L), Matrix(U), Matrix(P)};
 }
 
 std::vector<double> forward_substitution(
@@ -281,28 +296,27 @@ std::vector<double> forward_substitution(
 
 
 Matrix back_substitution(const Matrix& M) {
-  std::vector<std::vector<double>> M = M.M;
-  int n = M.size()
-
-  for (int i = 0; i < n; i++) {
-    
-  }
+  std::vector<std::vector<double>> A = M.M;
+  int n = A.size();
+  return Matrix(A);
 }
 
 
 Matrix Matrix::inverse() const {
   auto& A = (*this).M;
 
-  (L, U, P) = LU(A);
-  // PA = LU
-  // A = P^-1 LU
-  // A = P^T LU since the permutation matrix is orthogonal
-  // A^-1 = U^-1 L^-1 P
+  // (L, U, P) = LU(A);
+  // // PA = LU
+  // // A = P^-1 LU
+  // // A = P^T LU since the permutation matrix is orthogonal
+  // // A^-1 = U^-1 L^-1 P
 
-  auto& U_inv = back_substitution(U);
-  auto& L_inv = forward_substitution(L);
+  // auto& U_inv = back_substitution(U);
+  // auto& L_inv = forward_substitution(L);
 
-  return matmul_blocked(U_inv, matmul_blocked(_inv, P));
+  // return matmul_blocked(U_inv, matmul_blocked(_inv, P));
+
+  return Matrix(A);
 }
 
 Matrix inverse(const Matrix& A) {
