@@ -41,7 +41,10 @@ class Matrix {
     // doesn't modify Matrix.M, so is const
     Matrix transpose() const;
 
-    Matrix inverse() const;
+    // static function
+    static Matrix identity(int n);
+
+    std::optional<Matrix> inverse() const;
 };
 
 struct LUResult {
