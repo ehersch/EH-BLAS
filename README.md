@@ -49,3 +49,16 @@ If the import succeeds without errors, the build finished correctly.
 - https://medium.com/@cj.ptsz/parallelized-blocked-matrix-multiplication-using-openmp-97a4bc620a47
 - https://www.boost.org/doc/libs/1_59_0/libs/python/doc/tutorial/doc/html/index.html#python.quickstart
 - https://github.com/pybind/pybind11
+
+## Some C++ fundamentals with call by reference
+
+I use call by reference a lot `(const Matrix& M)` for example. Here is the rule of thumb:
+
+`T` -> copy
+`T&` -> same object (mutable)
+`const T&` -> same object (read-only)
+`T*` -> same object, may be null
+
+Essentially, Calling `T` itself will make a copy. If we just want to read (and not alter values), we can pass in a reference (the actual object and not a copy) with `T&`. The `const` part is a promise enforced by the compiler: “This function will not modify this object.” If the function tries to modify it, the compiler errors out.
+
+This sums it up well: https://www.geeksforgeeks.org/cpp/cpp-functions-pass-by-reference/

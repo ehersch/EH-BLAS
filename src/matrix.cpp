@@ -8,6 +8,8 @@
 #include <tuple>
 #include <cassert>
 #include <chrono>
+#include <algorithm>
+
 
 // Constructor taking a 2D vector
 Matrix::Matrix(const std::vector<std::vector<double>>& mat) : M(mat) {}
@@ -79,8 +81,15 @@ bool Matrix::approx_equal(const Matrix& other, double tol) const {
 
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < m; j++) {
-      double diff = std::abs(M[i][j] - other.M[i][j]);
-      if (diff > tol)
+      // double diff = std::abs(M[i][j] - other.M[i][j]);
+      // if (diff > tol)
+      //   return false;
+      double a = M[i][j];
+      double b = other.M[i][j];
+      double diff = std::abs(a - b);
+
+      // absolute + relative tolerance
+      if (diff > tol * std::max({1.0, std::abs(a), std::abs(b)}))
         return false;
     }
   }
@@ -112,17 +121,17 @@ std::optional<Matrix> Matrix::matmul_parallel(const Matrix& mat_a, const Matrix&
   std::vector<std::vector<double>> C(n, std::vector<double>(m, 0));
 
   //omp_set_num_threads(8);
-  #pragma omp parallel for collapse(3)
-
-  // change the order of i and col to increase hit rate
-  // i.e. we reuse A[row][i] so keep it cached
+  #pragma omp parallel for collapse(2)
   for (size_t row = 0; row < n; row++) {
-    for (size_t i = 0; i < k; i++) {
-      for (size_t col = 0; col < m; col++) {
-        C[row][col] += A[row][i] * B[i][col];
+    for (size_t col = 0; col < m; col++) {
+      double sum = 0.0;
+      for (size_t i = 0; i < k; i++) {
+        sum += A[row][i] * B[i][col];
       }
+      C[row][col] = sum;
     }
   }
+
 
   return Matrix(C);
 }
@@ -130,6 +139,24 @@ std::optional<Matrix> Matrix::matmul_parallel(const Matrix& mat_a, const Matrix&
 std::optional<Matrix> Matrix::operator*(const Matrix& other) const {
   return Matrix::matmul_blocked(*this, other);
 }
+
+Matrix Matrix::operator-(const Matrix& other) const {
+  int n = (int)M.size();
+  int m = (int)M[0].size();
+
+  std::vector<std::vector<double>> C(n, std::vector<double>(m, 0));
+
+  #pragma omp parallel for collapse(2)
+
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) {
+      C[i][j] = M[i][j] - other.M[i][j];
+    }
+  }
+
+  return Matrix(C);
+}
+
 
 std::optional<Matrix> Matrix::matmul_blocked(const Matrix& mat_a, const Matrix& mat_b) {
     // auto& just gets the type automatically and binds a reference to it
@@ -148,11 +175,12 @@ std::optional<Matrix> Matrix::matmul_blocked(const Matrix& mat_a, const Matrix& 
 
     std::vector<std::vector<double>> C(n, std::vector<double>(m, 0));
 
-    #pragma omp parallel for collapse(3) schedule(static)
+    //parallelize only (ii, jj) to avoid race conditions
+    #pragma omp parallel for collapse(2) schedule(static)
 
     for (size_t ii = 0; ii < n; ii += block) {
-        for (size_t kk = 0; kk < k; kk += block) {
-            for (size_t jj = 0; jj < m; jj += block) {
+        for (size_t jj = 0; jj < m; jj += block) {
+            for (size_t kk = 0; kk < k; kk += block) {
 
                 size_t i_max = std::min(ii + block, n);
                 size_t k_max = std::min(kk + block, k);
@@ -216,7 +244,7 @@ Matrix Matrix::transpose() const {
   # pragma omp parallel for collapse(2)
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < m; j++) {
-      B[i][j] = A[j][i];
+      B[j][i] = A[i][j];
     }
   }
   return Matrix(B);

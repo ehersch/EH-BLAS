@@ -32,6 +32,8 @@ class Matrix {
 
     std::optional<Matrix> operator*(const Matrix& other) const;
 
+    Matrix operator-(const Matrix& other) const;
+
     static std::optional<Matrix> matmul_blocked(const Matrix& mat_a, const Matrix& mat_b);
 
     std::string to_string() const;
