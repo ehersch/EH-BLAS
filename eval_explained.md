@@ -72,18 +72,6 @@ Absolute tolerance ignores scale.
 
 ---
 
-### Case 3: Mixed Scales (Matrices)
-
-In matrix algorithms:
-
-- diagonal entries may be ~1
-- off-diagonal entries should be ~0
-- intermediate values can be very large or very small
-
-A single absolute tolerance cannot correctly judge all entries at once.
-
----
-
 ## Floating-Point Error Is Relative
 
 IEEE double-precision floating point guarantees approximately:
@@ -110,46 +98,6 @@ To handle all regimes correctly, we use:
 
 This combines **absolute tolerance** and **relative tolerance** in a single,
 stable rule.
-
----
-
-## How This Rule Works
-
-### Near Zero → Absolute Tolerance
-
-If both `a` and `b` are small:
-
-`max(1.0, |a|, |b|) = 1.0`
-
-The condition reduces to:
-
-`|a - b| <= tol`
-
-This:
-
-- avoids dividing by tiny numbers
-- prevents exploding relative error
-- correctly handles values that should be zero
-
-This behavior is critical for:
-
-- off-diagonal matrix entries
-- residuals
-- sparsity patterns
-
----
-
-### Large Values → Relative Tolerance
-
-If either value is large:
-
-`allowed error ≈ tol × magnitude `
-
-This:
-
-- allows small relative error
-- tolerates larger absolute differences for large values
-- matches how floating-point hardware behaves
 
 ---
 
@@ -225,25 +173,8 @@ For example, NumPy uses:
 
 ---
 
-## How to Interpret Results
-
-| Behavior                        | Interpretation                |
-| ------------------------------- | ----------------------------- |
-| Same small error every run      | Correct                       |
-| Error ~1e-14 to 1e-12           | Excellent                     |
-| Error ~1e-6 to 1e-4             | Acceptable for large matrices |
-| Error ~1 or varies between runs | Bug (often a race condition)  |
-
----
-
-## One-Sentence Takeaway
-
 Floating-point error scales with magnitude, so numerical equality must be checked
 using a combination of absolute tolerance (near zero) and relative tolerance
 (for large values), not a single absolute threshold.
 
----
-
-**Bottom line:**  
-This comparison reflects how floating-point arithmetic actually works and is
-required for any serious numerical linear algebra code.
+This is how NumPy does it: https://numpy.org/devdocs/reference/generated/numpy.allclose.html

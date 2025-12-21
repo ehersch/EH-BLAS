@@ -26,7 +26,7 @@ class Matrix {
       However, using (Matrix& other) fails since it can’t bind a const or temporary Matrix (like the one created in (*C == result)) to a non-const reference.
     */
 
-    bool approx_equal(const Matrix& other, double tol = 1e-9) const;
+    bool approx_equal(const Matrix& other, double rtol=1e-05, double atol=1e-08) const;
 
     static std::optional<Matrix> matmul_parallel(const Matrix& mat_a, const Matrix& mat_b);
 

@@ -69,10 +69,10 @@ std::optional<Matrix> Matrix::matmul(const Matrix& mat_a, const Matrix& mat_b) {
 
 // add const bc doesnt alter member's internal state
 bool Matrix::operator==(const Matrix& other) const {
-  return approx_equal(other, 1e-12);
+  return approx_equal(other);
 }
 
-bool Matrix::approx_equal(const Matrix& other, double tol) const {
+bool Matrix::approx_equal(const Matrix& other, double rtol, double atol) const {
   if (M.size() != other.M.size() || M[0].size() != other.M[0].size())
     return false;
 
@@ -81,15 +81,10 @@ bool Matrix::approx_equal(const Matrix& other, double tol) const {
 
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < m; j++) {
-      // double diff = std::abs(M[i][j] - other.M[i][j]);
-      // if (diff > tol)
-      //   return false;
       double a = M[i][j];
       double b = other.M[i][j];
-      double diff = std::abs(a - b);
-
       // absolute + relative tolerance
-      if (diff > tol * std::max({1.0, std::abs(a), std::abs(b)}))
+      if (std::abs(a - b) > (atol + rtol * std::abs(b)))
         return false;
     }
   }

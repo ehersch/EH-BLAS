@@ -47,7 +47,8 @@ PYBIND11_MODULE(emath, m) {
         .def("approx_equal",
             &Matrix::approx_equal,
             py::arg("other"),
-            py::arg("tol") = 1e-6,
+            py::arg("rtol") = 1e-5,
+            py::arg("atol") = 1e-08,
             "Approximately equal."
         )
 

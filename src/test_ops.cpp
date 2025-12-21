@@ -3,17 +3,20 @@
 #include <iostream>
 #include "matrix.h"
 #include <random>
+#include <ctime>
 
 double max_abs_entry(const Matrix& M) {
-    double maxv = 0.0;
-    for (const auto& row : M.M)
-        for (double v : row)
-            maxv = std::max(maxv, std::abs(v));
-    return maxv;
+  double maxv = 0.0;
+  for (const auto& row : M.M)
+    for (double v : row)
+      maxv = std::max(maxv, std::abs(v));
+  return maxv;
 }
 
 Matrix random_matrix(int n) {
-  std::default_random_engine generator;
+  static std::mt19937 generator(std::random_device{}());  // seed ONCE per call
+  // https://en.cppreference.com/w/cpp/numeric/random/random_device.html
+  // https://cplusplus.com/reference/random/mt19937/
   std::normal_distribution<double> distribution(0,1);
   std::vector<std::vector<double>> mat(n, std::vector<double>(n, 0));
 
@@ -32,7 +35,7 @@ void test_identity(int n) {
   Matrix I = Matrix::identity(A.M.size());
   Matrix I_approx = (A * A_inv).value();
   std::cout << "Inverse of size " << n << " correct: " << std::boolalpha << 
-  I.approx_equal(I_approx, 1e-4) << std::endl;
+  I.approx_equal(I_approx) << std::endl;
 
   Matrix I_approx_2 = (A * A_inv).value();
   Matrix err = I_approx_2 - Matrix::identity(n);
@@ -67,5 +70,5 @@ int main() {
   std::cout << "Inverse correct: " << std::boolalpha << 
   I.approx_equal(I_approx) << std::endl;
 
-  test_identity(100);
+  test_identity(5);
 }

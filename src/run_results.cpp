@@ -4,9 +4,10 @@
 #include <cassert>
 #include <chrono>
 #include <random>
+#include <ctime>
 
 Matrix random_matrix(int rows, int cols) {
-  std::default_random_engine generator;
+  static std::mt19937 generator(std::random_device{}());  // seed ONCE per call
   std::normal_distribution<double> distribution(0,1);
   std::vector<std::vector<double>> mat(rows, std::vector<double>(cols, 0));
 
