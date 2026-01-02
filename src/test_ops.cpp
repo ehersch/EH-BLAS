@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include "matrix.h"
+#include "utils.h"
 #include <random>
 #include <ctime>
 
@@ -31,14 +32,14 @@ Matrix random_matrix(int n) {
 
 void test_identity(int n) {
   Matrix A = random_matrix(n);
-  Matrix A_inv = A.inverse().value();
-  Matrix I = Matrix::identity(A.M.size());
+  Matrix A_inv = inverse(A).value();
+  Matrix I = identity(A.M.size());
   Matrix I_approx = (A * A_inv).value();
   std::cout << "Inverse of size " << n << " correct: " << std::boolalpha << 
   I.approx_equal(I_approx) << std::endl;
 
   Matrix I_approx_2 = (A * A_inv).value();
-  Matrix err = I_approx_2 - Matrix::identity(n);
+  Matrix err = I_approx_2 - identity(n);
 
   std::cout << "max |I - A*A_inv| = "
             << max_abs_entry(err) << std::endl;
@@ -48,7 +49,7 @@ int main() {
   std::vector<std::vector<double>> A = {{1,2},{3,4}};
 
   Matrix mat_A = Matrix(A);
-  Matrix B = mat_A.transpose();
+  Matrix B = transpose(mat_A);
   std::cout << B.to_string() << std::endl;
 
   auto lu = LU(mat_A);
@@ -63,9 +64,9 @@ int main() {
   bool is_accurate = PA.approx_equal(LU_mat);
   std::cout << "LU decomposition correct: " << std::boolalpha << is_accurate << std::endl;
 
-  Matrix A_inv = mat_A.inverse().value();
+  Matrix A_inv = inverse(mat_A).value();
   A_inv.print();
-  Matrix I = Matrix::identity(2);
+  Matrix I = identity(2);
   Matrix I_approx = (mat_A * A_inv).value();
   std::cout << "Inverse correct: " << std::boolalpha << 
   I.approx_equal(I_approx) << std::endl;

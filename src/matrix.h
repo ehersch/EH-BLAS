@@ -39,22 +39,6 @@ class Matrix {
     std::string to_string() const;
 
     std::tuple<double, double, double> compare_times(const Matrix& other) const;
-
-    // doesn't modify Matrix.M, so is const
-    Matrix transpose() const;
-
-    // static function
-    static Matrix identity(int n);
-
-    std::optional<Matrix> inverse() const;
 };
-
-struct LUResult {
-    Matrix L;
-    Matrix U;
-    Matrix P;
-};
-
-LUResult LU(const Matrix& A);
 
 #endif
