@@ -21,6 +21,7 @@ class OLSRegression {
     };
 
     RegressionSolution solve() const;
-};
 
+    double find_l2_residual() const;
+};
 #endif
