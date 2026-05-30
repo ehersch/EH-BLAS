@@ -12,8 +12,8 @@ class OLSRegression {
   private:
     std::vector<std::vector<double>> X;
     std::vector<double> y;
-  
-  public:
+
+    public:
     OLSRegression(const std::vector<std::vector<double>>& X_in, const std::vector<double>& y_in);
 
     struct RegressionSolution {

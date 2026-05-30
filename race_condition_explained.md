@@ -74,8 +74,7 @@ C[i][j] += A[i][k] * B[k][j];
 `collapse(n)` is only safe when:
 
 - Each iteration writes to disjoint memory
-- In blocked matrix multiplication:
-- different `k` blocks contribute to the same `C[i][j]` parallelizing over k causes data races
+- In blocked matrix multiplication, different `k` blocks contribute to the same `C[i][j]` parallelizing over k causes data races
 
 This led to:
 
