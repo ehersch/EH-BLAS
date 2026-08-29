@@ -184,6 +184,7 @@ std::optional<Matrix> Matrix::matmul_blocked(const Matrix& mat_a, const Matrix& 
                 for (size_t i = ii; i < i_max; i++) {
                     for (size_t kk2 = kk; kk2 < k_max; kk2++) {
                         double a_val = A[i][kk2];
+                        #pragma omp simd
                         for (size_t j = jj; j < j_max; j++) {
                             C[i][j] += a_val * B[kk2][j];
                         }
