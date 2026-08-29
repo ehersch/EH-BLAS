@@ -40,11 +40,10 @@ double OLSRegression::find_l2_residual() const {
   Matrix y_mat(y_col); // (n x 1)
   Matrix diff = y_mat - y_hat;
 
-  std::vector<std::vector<double>> diff_vector = diff.M;
-  int n = diff_vector.size();
+  int n = static_cast<int>(diff.rows);
 
   for (int i = 0; i < n; i++) {
-    val += std::pow(diff_vector[i][0], 2.0);
+    val += std::pow(diff.at(i, 0), 2.0);
   }
   return val;
 }

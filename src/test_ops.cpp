@@ -8,9 +8,8 @@
 
 double max_abs_entry(const Matrix& M) {
   double maxv = 0.0;
-  for (const auto& row : M.M)
-    for (double v : row)
-      maxv = std::max(maxv, std::abs(v));
+  for (double v : M.data)
+    maxv = std::max(maxv, std::abs(v));
   return maxv;
 }
 
@@ -33,7 +32,7 @@ Matrix random_matrix(int n) {
 void test_identity(int n) {
   Matrix A = random_matrix(n);
   Matrix A_inv = inverse(A).value();
-  Matrix I = identity(A.M.size());
+  Matrix I = identity(static_cast<int>(A.rows));
   Matrix I_approx = (A * A_inv).value();
   std::cout << "Inverse of size " << n << " correct: " << std::boolalpha << 
   I.approx_equal(I_approx) << std::endl;
